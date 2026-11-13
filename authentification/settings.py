@@ -83,9 +83,7 @@ MIDDLEWARE = [
 # ============================================================
 # CORS & CSRF
 # ============================================================
-# ✅ CORRIGÉ : CORS_ALLOW_ALL_ORIGINS = True uniquement en local
-CORS_ALLOW_ALL_ORIGINS = DEBUG
-
+CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_CREDENTIALS = True
 
 CORS_ALLOWED_ORIGINS = os.environ.get(
@@ -162,6 +160,8 @@ WSGI_APPLICATION = 'authentification.wsgi.application'
 # ============================================================
 # DATABASE
 # ============================================================
+# En production (Render) : PostgreSQL via DATABASE_URL
+# En local : SQLite
 import dj_database_url
 
 if os.environ.get('DATABASE_URL'):
@@ -223,12 +223,8 @@ USE_TZ = True
 # STATIC & MEDIA
 # ============================================================
 STATIC_URL = '/static/'
+STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')] if (BASE_DIR / 'static').exists() else []
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-
-# ✅ Seulement si le dossier existe (évite l'avertissement)
-static_dir = BASE_DIR / 'static'
-STATICFILES_DIRS = [static_dir] if static_dir.exists() else []
-
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 MEDIA_URL = '/media/'
@@ -241,14 +237,13 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
 # ============================================================
-# SÉCURITÉ PRODUCTION (uniquement si DEBUG=False ET hors local)
+# SÉCURITÉ PRODUCTION (uniquement si DEBUG=False)
 # ============================================================
 if not DEBUG:
-    # ✅ Ces réglages sont sûrs en production (Render, Railway, etc.)
     SECURE_SSL_REDIRECT = True
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
     SECURE_HSTS_SECONDS = 31536000
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
-    SECURE_HSTS_PRELOAD = False  # ⚠️ False pour éviter l'irréversible
+    SECURE_HSTS_PRELOAD = True
     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
