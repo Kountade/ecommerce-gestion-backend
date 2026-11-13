@@ -19,8 +19,8 @@ DEBUG = True
 ALLOWED_HOSTS = [
     'localhost',
     '127.0.0.1',
-    '.onrender.com',
-    '*',  # ⚠️ à retirer en production
+    'ecommerce-gestion-backend.onrender.com',
+    
 ]
 
 
@@ -82,7 +82,7 @@ CORS_ALLOWED_ORIGINS = [
     'http://127.0.0.1:5173',
     'http://localhost:5174',
     'http://127.0.0.1:5174',
-    'https://sodepci-frontend.onrender.com',
+    'https://ecommerce-gestion-backend.onrender.com',
 ]
 
 CSRF_TRUSTED_ORIGINS = [
@@ -92,7 +92,7 @@ CSRF_TRUSTED_ORIGINS = [
     'http://127.0.0.1:5173',
     'http://localhost:5174',
     'http://127.0.0.1:5174',
-    'https://sodepci-frontend.onrender.com',
+    'https://ecommerce-gestion-backend.onrender.com',
 ]
 
 CSRF_COOKIE_HTTPONLY = False
