@@ -25,7 +25,7 @@ ALLOWED_HOSTS = os.environ.get(
     'localhost,127.0.0.1,127.0.0.1:8000'
 ).split(',')
 
-# ⚠️ CRUCIAL POUR LES EMAILS (Liens de reset password)
+# ⚠️ CRUCIAL POUR LES EMAILS (C'est ça qui va corriger ton lien localhost)
 FRONTEND_URL = os.environ.get('FRONTEND_URL', 'http://localhost:5173/')
 if not FRONTEND_URL.endswith('/'):
     FRONTEND_URL += '/'
@@ -83,7 +83,6 @@ MIDDLEWARE = [
 # ============================================================
 # CORS & CSRF
 # ============================================================
-# ✅ CORRIGÉ : CORS_ALLOW_ALL_ORIGINS = True uniquement en local
 CORS_ALLOW_ALL_ORIGINS = DEBUG
 CORS_ALLOW_CREDENTIALS = True
 
@@ -159,28 +158,14 @@ WSGI_APPLICATION = 'authentification.wsgi.application'
 
 
 # ============================================================
-# DATABASE
+# DATABASE (SQLite uniquement - pas de dj_database_url)
 # ============================================================
-# ✅ L'import est obligatoire pour que Django démarre sur Render
-import dj_database_url
-
-if os.environ.get('DATABASE_URL'):
-    # Si tu ajoutes PostgreSQL plus tard sur Render, ça marchera automatiquement
-    DATABASES = {
-        'default': dj_database_url.config(
-            default=os.environ.get('DATABASE_URL'),
-            conn_max_age=600,
-            conn_health_checks=True,
-        )
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
     }
-else:
-    # ✅ Utilise SQLite par défaut (ce que tu utilises actuellement sur Render)
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': BASE_DIR / 'db.sqlite3',
-        }
-    }
+}
 
 
 # ============================================================
@@ -242,7 +227,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
 # ============================================================
-# SÉCURITÉ PRODUCTION (uniquement si DEBUG=False)
+# SÉCURITÉ PRODUCTION
 # ============================================================
 if not DEBUG:
     SECURE_SSL_REDIRECT = True
@@ -250,5 +235,5 @@ if not DEBUG:
     CSRF_COOKIE_SECURE = True
     SECURE_HSTS_SECONDS = 31536000
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
-    SECURE_HSTS_PRELOAD = False  # ✅ False pour éviter l'irréversible
+    SECURE_HSTS_PRELOAD = False
     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
