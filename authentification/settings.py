@@ -25,7 +25,7 @@ ALLOWED_HOSTS = os.environ.get(
     'localhost,127.0.0.1,127.0.0.1:8000'
 ).split(',')
 
-# ⚠️ CRUCIAL POUR LES EMAILS
+# ⚠️ CRUCIAL POUR LES EMAILS (Liens de reset password)
 FRONTEND_URL = os.environ.get('FRONTEND_URL', 'http://localhost:5173/')
 if not FRONTEND_URL.endswith('/'):
     FRONTEND_URL += '/'
@@ -83,7 +83,8 @@ MIDDLEWARE = [
 # ============================================================
 # CORS & CSRF
 # ============================================================
-CORS_ALLOW_ALL_ORIGINS = True
+# ✅ CORRIGÉ : CORS_ALLOW_ALL_ORIGINS = True uniquement en local
+CORS_ALLOW_ALL_ORIGINS = DEBUG
 CORS_ALLOW_CREDENTIALS = True
 
 CORS_ALLOWED_ORIGINS = os.environ.get(
@@ -160,11 +161,11 @@ WSGI_APPLICATION = 'authentification.wsgi.application'
 # ============================================================
 # DATABASE
 # ============================================================
-# En production (Render) : PostgreSQL via DATABASE_URL
-# En local : SQLite
+# ✅ L'import est obligatoire pour que Django démarre sur Render
 import dj_database_url
 
 if os.environ.get('DATABASE_URL'):
+    # Si tu ajoutes PostgreSQL plus tard sur Render, ça marchera automatiquement
     DATABASES = {
         'default': dj_database_url.config(
             default=os.environ.get('DATABASE_URL'),
@@ -173,6 +174,7 @@ if os.environ.get('DATABASE_URL'):
         )
     }
 else:
+    # ✅ Utilise SQLite par défaut (ce que tu utilises actuellement sur Render)
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
@@ -223,8 +225,11 @@ USE_TZ = True
 # STATIC & MEDIA
 # ============================================================
 STATIC_URL = '/static/'
-STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')] if (BASE_DIR / 'static').exists() else []
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
+static_dir = BASE_DIR / 'static'
+STATICFILES_DIRS = [static_dir] if static_dir.exists() else []
+
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 MEDIA_URL = '/media/'
@@ -245,5 +250,5 @@ if not DEBUG:
     CSRF_COOKIE_SECURE = True
     SECURE_HSTS_SECONDS = 31536000
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
-    SECURE_HSTS_PRELOAD = True
+    SECURE_HSTS_PRELOAD = False  # ✅ False pour éviter l'irréversible
     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
