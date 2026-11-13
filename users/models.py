@@ -1,4 +1,10 @@
 # users/models.py
+# ============================================================
+# MODELS UTILISATEURS + SIGNAL RESET PASSWORD
+# ============================================================
+
+import logging
+
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.base_user import BaseUserManager
@@ -8,8 +14,14 @@ from django.dispatch import receiver
 from django.template.loader import render_to_string
 from django.core.mail import EmailMultiAlternatives
 from django.utils.html import strip_tags
+from django.template.exceptions import TemplateDoesNotExist
+
+logger = logging.getLogger(__name__)
 
 
+# ============================================================
+# MANAGER PERSONNALISÉ
+# ============================================================
 class CustomUserManager(BaseUserManager):
     def create_user(self, email, password=None, **extra_fields):
         if not email:
@@ -47,6 +59,9 @@ class CustomUserManager(BaseUserManager):
         return self.create_user(email, password, **extra_fields)
 
 
+# ============================================================
+# MODÈLE UTILISATEUR
+# ============================================================
 class CustomUser(AbstractUser):
     ROLE_CHOICES = (
         ('admin', 'Administrateur'),
@@ -60,7 +75,8 @@ class CustomUser(AbstractUser):
     phone_number = models.CharField(max_length=20, null=True, blank=True)
     address = models.TextField(null=True, blank=True)
     profile_picture = models.ImageField(
-        upload_to='profiles/', null=True, blank=True)
+        upload_to='profiles/', null=True, blank=True
+    )
 
     role = models.CharField(
         max_length=20,
@@ -155,14 +171,23 @@ class CustomUser(AbstractUser):
 
 
 # ============================================================
-# ✅ SIGNAL : envoi de l'email de réinitialisation
+# ✅ SIGNAL : ENVOI DE L'EMAIL DE RÉINITIALISATION
 # ============================================================
 @receiver(reset_password_token_created)
 def password_reset_token_created(reset_password_token, *args, **kwargs):
     """
     Envoie un email HTML contenant le lien de réinitialisation.
+
+    Le lien pointe vers :
+    - EN LOCAL : http://localhost:5173/password-reset/<token>
+    - EN PROD  : https://ecommerce-gestion.onrender.com/password-reset/<token>
+
+    Le comportement est piloté par la variable d'environnement FRONTEND_URL
+    définie sur Render (onglet Environment).
     """
-    # URL du frontend (configurable via settings.FRONTEND_URL)
+    # ============================================================
+    # 1. RÉCUPÉRATION DE L'URL FRONTEND
+    # ============================================================
     sitelink = getattr(settings, 'FRONTEND_URL', 'http://localhost:5173/')
     if not sitelink.endswith('/'):
         sitelink += '/'
@@ -170,27 +195,54 @@ def password_reset_token_created(reset_password_token, *args, **kwargs):
     token = str(reset_password_token.key)
     full_link = f"{sitelink}password-reset/{token}"
 
+    logger.info(
+        f"🔐 Reset password demandé pour {reset_password_token.user.email} "
+        f"→ lien : {full_link}"
+    )
+
+    # ============================================================
+    # 2. CONTEXTE DU TEMPLATE
+    # ============================================================
     context = {
         'full_link': full_link,
         'email_address': reset_password_token.user.email,
     }
 
-    html_message = render_to_string("backend/email.html", context=context)
+    # ============================================================
+    # 3. RENDU DU TEMPLATE
+    # ============================================================
+    try:
+        html_message = render_to_string("backend/email.html", context=context)
+    except TemplateDoesNotExist:
+        logger.error(
+            "❌ Template 'backend/email.html' introuvable. "
+            "Vérifiez que le fichier est bien dans templates/backend/email.html "
+            "et qu'il est commit sur Git."
+        )
+        return  # On s'arrête là pour ne pas crasher la requête HTTP
+
     plain_message = strip_tags(html_message)
 
-    msg = EmailMultiAlternatives(
-        subject=f"Réinitialisation de mot de passe pour {reset_password_token.user.email}",
-        body=plain_message,
-        from_email=settings.EMAIL_HOST_USER,   # ✅ cohérent avec le SMTP Gmail
-        to=[reset_password_token.user.email],
-    )
-    msg.attach_alternative(html_message, "text/html")
-
+    # ============================================================
+    # 4. ENVOI DE L'EMAIL
+    # ============================================================
     try:
+        msg = EmailMultiAlternatives(
+            subject=f"Réinitialisation de mot de passe pour {reset_password_token.user.email}",
+            body=plain_message,
+            from_email=settings.EMAIL_HOST_USER,
+            to=[reset_password_token.user.email],
+        )
+        msg.attach_alternative(html_message, "text/html")
         msg.send(fail_silently=False)
+
+        logger.info(
+            f"✅ Email reset password envoyé à {reset_password_token.user.email}"
+        )
+
     except Exception as e:
         # On log l'erreur mais on ne crashe pas la requête HTTP
-        import logging
-        logging.getLogger(__name__).error(
-            f"Erreur envoi email reset password : {e}"
+        logger.exception(
+            f"❌ Erreur envoi email reset password à "
+            f"{reset_password_token.user.email} : {e}"
         )
