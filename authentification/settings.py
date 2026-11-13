@@ -16,12 +16,11 @@ SECRET_KEY = 'django-insecure-fogznagdk_m*g#ls^*xsti7zniyi=oub7@krfp1b!envlt9x=@
 
 DEBUG = True
 
-ALLOWED_HOSTS = [
-    'localhost',
-    '127.0.0.1',
-    'ecommerce-gestion-backend.onrender.com',
-    
-]
+ALLOWED_HOSTS = ["ecommerce-gestion-backend.onrender.com",
+                 "localhost", "127.0.0.1"]
+CSRF_TRUSTED_ORIGINS = ['https://ecommerce-gestion-backend.onrender.com',
+                        'https://ecommerce-gestion-backend.onrender.com',]
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 
 # ============================================================
