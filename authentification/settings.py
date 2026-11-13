@@ -1,0 +1,214 @@
+"""
+Django settings for authentification project.
+"""
+
+from pathlib import Path
+import os
+
+# Build paths inside the project like this: BASE_DIR / 'subdir'.
+BASE_DIR = Path(__file__).resolve().parent.parent
+
+
+# ============================================================
+# SÉCURITÉ
+# ============================================================
+SECRET_KEY = 'django-insecure-fogznagdk_m*g#ls^*xsti7zniyi=oub7@krfp1b!envlt9x=@'
+
+DEBUG = True
+
+ALLOWED_HOSTS = [
+    'localhost',
+    '127.0.0.1',
+    '.onrender.com',
+    '*',  # ⚠️ à retirer en production
+]
+
+
+# ============================================================
+# APPLICATIONS
+# ============================================================
+INSTALLED_APPS = [
+    'django.contrib.admin',
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
+    'django.contrib.sessions',
+    'django.contrib.messages',
+    'django.contrib.staticfiles',
+
+    # Packages tiers
+    'rest_framework',
+    'knox',
+    'corsheaders',
+    'django_filters',
+    'django_rest_passwordreset',      # ✅ requis pour le reset password
+
+    # Vos apps
+    'users',
+    'produits_stocks',
+    'ventes_clients',
+    'tresorerie',
+    'finances',
+    'achats_fournisseurs',
+    'dashboard',
+]
+
+
+# ============================================================
+# MIDDLEWARE
+# ============================================================
+MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
+    "whitenoise.middleware.WhiteNoiseMiddleware",
+    'django.middleware.security.SecurityMiddleware',
+    'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.common.CommonMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.contrib.messages.middleware.MessageMiddleware',
+    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+]
+
+
+# ============================================================
+# CORS & CSRF
+# ============================================================
+CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_CREDENTIALS = True
+
+CORS_ALLOWED_ORIGINS = [
+    'http://localhost:3000',
+    'http://127.0.0.1:3000',
+    'http://localhost:5173',
+    'http://127.0.0.1:5173',
+    'http://localhost:5174',
+    'http://127.0.0.1:5174',
+    'https://sodepci-frontend.onrender.com',
+]
+
+CSRF_TRUSTED_ORIGINS = [
+    'http://localhost:3000',
+    'http://127.0.0.1:3000',
+    'http://localhost:5173',
+    'http://127.0.0.1:5173',
+    'http://localhost:5174',
+    'http://127.0.0.1:5174',
+    'https://sodepci-frontend.onrender.com',
+]
+
+CSRF_COOKIE_HTTPONLY = False
+CSRF_COOKIE_SAMESITE = 'Lax'
+SESSION_COOKIE_SAMESITE = 'Lax'
+
+
+# ============================================================
+# AUTHENTIFICATION
+# ============================================================
+AUTH_USER_MODEL = 'users.CustomUser'
+
+# ✅ On garde ModelBackend (utile pour l'admin Django)
+# ✅ On ajoute EmailAuthBackend (utile pour le login par email)
+AUTHENTICATION_BACKENDS = [
+    'users.auth_backend.EmailAuthBackend',
+    'django.contrib.auth.backends.ModelBackend',
+]
+
+
+# ============================================================
+# REST FRAMEWORK
+# ============================================================
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'knox.auth.TokenAuthentication',
+    ),
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ],
+    'DEFAULT_FILTER_BACKENDS': [
+        'django_filters.rest_framework.DjangoFilterBackend',
+    ],
+}
+
+
+ROOT_URLCONF = 'authentification.urls'
+
+
+# ============================================================
+# TEMPLATES
+# ============================================================
+TEMPLATES = [
+    {
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'DIRS': [BASE_DIR / "templates"],     # ✅ contient backend/email.html
+        'APP_DIRS': True,
+        'OPTIONS': {
+            'context_processors': [
+                'django.template.context_processors.request',
+                'django.contrib.auth.context_processors.auth',
+                'django.contrib.messages.context_processors.messages',
+            ],
+        },
+    },
+]
+
+
+WSGI_APPLICATION = 'authentification.wsgi.application'
+
+
+# ============================================================
+# DATABASE
+# ============================================================
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
+    }
+}
+
+
+# ============================================================
+# PASSWORD VALIDATION
+# ============================================================
+AUTH_PASSWORD_VALIDATORS = [
+    {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
+]
+
+
+# ============================================================
+# EMAIL  — ✅ UNE SEULE DÉFINITION (SMTP)
+# ============================================================
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'bounamakountagoudiaby@gmail.com'
+EMAIL_HOST_PASSWORD = 'ngqjlxsfefxqtier'      # mot de passe d'application Gmail
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+
+
+# ============================================================
+# I18N
+# ============================================================
+LANGUAGE_CODE = 'fr-fr'
+TIME_ZONE = 'Africa/Dakar'
+USE_I18N = True
+USE_TZ = True
+
+
+# ============================================================
+# STATIC & MEDIA
+# ============================================================
+STATIC_URL = '/static/'
+STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media/')
+
+IMAGE_MAX_SIZE = (800, 800)
+THUMBNAIL_SIZE = (150, 150)
+
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'

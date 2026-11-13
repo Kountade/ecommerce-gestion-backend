@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{{ title|default:"Notification ZonACha" }}</title>
+</head>
+<body style="margin:0; padding:0; background-color:#f3f4f6; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
+
+  <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#f3f4f6; padding:40px 20px;">
+    <tr>
+      <td align="center">
+
+        <!-- CARTE PRINCIPALE -->
+        <table width="600" cellpadding="0" cellspacing="0" style="max-width:600px; width:100%; background-color:#ffffff; border-radius:16px; overflow:hidden; box-shadow:0 4px 6px rgba(0,0,0,0.1);">
+
+          <!-- HEADER ORANGE -->
+          <tr>
+            <td style="background: linear-gradient(135deg, #f97316 0%, #ea580c 100%); padding:40px 30px; text-align:center;">
+              <h1 style="color:#ffffff; margin:0; font-size:28px; font-weight:700;">
+                ZonACha
+              </h1>
+              <p style="color:#ffedd5; margin:8px 0 0 0; font-size:14px;">
+                Plus qu'une boutique, une expérience.
+              </p>
+            </td>
+          </tr>
+
+          <!-- BADGE STATUT -->
+          <tr>
+            <td style="padding:30px 30px 0 30px; text-align:center;">
+              <span style="display:inline-block; background-color:{{ status_color|default:'#f59e0b' }}; color:#ffffff; padding:8px 20px; border-radius:20px; font-size:13px; font-weight:600;">
+                {{ status_badge|default:"Notification" }}
+              </span>
+            </td>
+          </tr>
+
+          <!-- TITRE -->
+          <tr>
+            <td style="padding:20px 30px 10px 30px; text-align:center;">
+              <h2 style="color:#111827; margin:0; font-size:24px; font-weight:700;">
+                {{ title|default:"Notification de commande" }}
+              </h2>
+              <p style="color:#6b7280; margin:8px 0 0 0; font-size:14px;">
+                {{ subtitle|default:"" }}
+              </p>
+            </td>
+          </tr>
+
+          <!-- INTRO -->
+          <tr>
+            <td style="padding:20px 30px; color:#374151; font-size:15px; line-height:1.6;">
+              {{ intro_text|default:""|safe }}
+            </td>
+          </tr>
+
+          <!-- DÉTAILS COMMANDE -->
+          <tr>
+            <td style="padding:10px 30px;">
+              <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#fef3c7; border-radius:12px; padding:20px;">
+                <tr>
+                  <td style="padding:5px 0;">
+                    <span style="color:#92400e; font-size:13px;">Numéro de commande</span><br>
+                    <strong style="color:#111827; font-size:16px;">{{ invoice_number|default:"—" }}</strong>
+                  </td>
+                  <td align="right" style="padding:5px 0;">
+                    <span style="color:#92400e; font-size:13px;">Date</span><br>
+                    <strong style="color:#111827; font-size:14px;">
+                      {% if sale_date %}{{ sale_date|date:"d/m/Y H:i" }}{% else %}—{% endif %}
+                    </strong>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- PRODUITS -->
+          {% if lines %}
+          <tr>
+            <td style="padding:20px 30px 10px 30px;">
+              <h3 style="color:#111827; margin:0 0 12px 0; font-size:16px; font-weight:700;">
+                Détail de votre commande
+              </h3>
+              <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;">
+                {% for line in lines %}
+                <tr style="border-bottom:1px solid #e5e7eb;">
+                  <td style="padding:12px 0; color:#111827; font-size:14px;">
+                    <strong>{{ line.product.name|default:"Produit" }}</strong>
+                    <br>
+                    <span style="color:#6b7280; font-size:12px;">
+                      Réf: {{ line.product.code|default:"—" }}
+                    </span>
+                  </td>
+                  <td style="padding:12px 0; color:#6b7280; font-size:13px; text-align:center;">
+                    x{{ line.quantity }}
+                  </td>
+                  <td style="padding:12px 0; color:#111827; font-size:14px; text-align:right; font-weight:600;">
+                    {{ line.total|floatformat:0 }} FCFA
+                  </td>
+                </tr>
+                {% endfor %}
+              </table>
+            </td>
+          </tr>
+          {% endif %}
+
+          <!-- TOTAUX -->
+          <tr>
+            <td style="padding:20px 30px;">
+              <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#f9fafb; border-radius:12px; padding:20px;">
+                <tr>
+                  <td style="padding:6px 0; color:#6b7280; font-size:14px;">Sous-total</td>
+                  <td align="right" style="padding:6px 0; color:#111827; font-size:14px;">
+                    {{ subtotal|floatformat:0 }} FCFA
+                  </td>
+                </tr>
+                {% if tax_amount and tax_amount > 0 %}
+                <tr>
+                  <td style="padding:6px 0; color:#6b7280; font-size:14px;">TVA</td>
+                  <td align="right" style="padding:6px 0; color:#111827; font-size:14px;">
+                    {{ tax_amount|floatformat:0 }} FCFA
+                  </td>
+                </tr>
+                {% endif %}
+                {% if shipping_fee and shipping_fee > 0 %}
+                <tr>
+                  <td style="padding:6px 0; color:#6b7280; font-size:14px;">Livraison</td>
+                  <td align="right" style="padding:6px 0; color:#111827; font-size:14px;">
+                    {{ shipping_fee|floatformat:0 }} FCFA
+                  </td>
+                </tr>
+                {% endif %}
+                <tr>
+                  <td style="padding:12px 0 0 0; border-top:2px solid #e5e7eb; color:#111827; font-size:16px; font-weight:700;">
+                    TOTAL
+                  </td>
+                  <td align="right" style="padding:12px 0 0 0; border-top:2px solid #e5e7eb; color:#ea580c; font-size:18px; font-weight:700;">
+                    {{ total|floatformat:0 }} FCFA
+                  </td>
+                </tr>
+                {% if amount_paid and amount_paid > 0 %}
+                <tr>
+                  <td style="padding:6px 0 0 0; color:#10b981; font-size:13px;">Déjà payé</td>
+                  <td align="right" style="padding:6px 0 0 0; color:#10b981; font-size:13px;">
+                    {{ amount_paid|floatformat:0 }} FCFA
+                  </td>
+                </tr>
+                {% endif %}
+                {% if amount_due and amount_due > 0 %}
+                <tr>
+                  <td style="padding:6px 0 0 0; color:#ef4444; font-size:13px;">Reste à payer</td>
+                  <td align="right" style="padding:6px 0 0 0; color:#ef4444; font-size:13px;">
+                    {{ amount_due|floatformat:0 }} FCFA
+                  </td>
+                </tr>
+                {% endif %}
+              </table>
+            </td>
+          </tr>
+
+          <!-- LIVRAISON -->
+          {% if delivery_address %}
+          <tr>
+            <td style="padding:10px 30px 20px 30px;">
+              <h3 style="color:#111827; margin:0 0 8px 0; font-size:15px; font-weight:700;">
+                Adresse de livraison
+              </h3>
+              <p style="color:#374151; margin:0; font-size:14px; line-height:1.6;">
+                {{ delivery_address }}
+              </p>
+            </td>
+          </tr>
+          {% endif %}
+
+          <!-- SUIVI (numéro si existe) -->
+          {% if tracking_number %}
+          <tr>
+            <td style="padding:0 30px 10px 30px;">
+              <div style="background-color:#eff6ff; border-left:4px solid #3b82f6; padding:12px 16px; border-radius:8px;">
+                <p style="color:#1e40af; margin:0; font-size:13px;">
+                  <strong>Numéro de suivi :</strong> {{ tracking_number }}
+                </p>
+              </div>
+            </td>
+          </tr>
+          {% endif %}
+
+          <!-- BOUTON ADAPTÉ SELON LE TYPE D'EMAIL -->
+          <tr>
+            <td align="center" style="padding:20px 30px;">
+              {% if email_type == 'cancelled' %}
+                <a href="{{ site_url|default:'#' }}"
+                   style="display:inline-block; background-color:#f97316; color:#ffffff; padding:14px 32px; border-radius:10px; text-decoration:none; font-size:15px; font-weight:600;">
+                  Retour à la boutique
+                </a>
+              {% elif email_type == 'delivered' %}
+                <a href="{{ site_url|default:'#' }}"
+                   style="display:inline-block; background-color:#f97316; color:#ffffff; padding:14px 32px; border-radius:10px; text-decoration:none; font-size:15px; font-weight:600;">
+                  Commander à nouveau
+                </a>
+              {% else %}
+                <a href="{{ tracking_url|default:'#' }}"
+                   style="display:inline-block; background-color:#f97316; color:#ffffff; padding:14px 32px; border-radius:10px; text-decoration:none; font-size:15px; font-weight:600;">
+                  Suivre ma commande
+                </a>
+              {% endif %}
+            </td>
+          </tr>
+
+          <!-- FOOTER -->
+          <tr>
+            <td style="background-color:#f9fafb; padding:30px; text-align:center; border-top:1px solid #e5e7eb;">
+              <p style="color:#6b7280; margin:0 0 8px 0; font-size:13px;">
+                Une question ? Contactez-nous :
+              </p>
+              <p style="color:#374151; margin:0 0 16px 0; font-size:14px; font-weight:600;">
+                support@zonacha.com
+              </p>
+              <p style="color:#9ca3af; margin:0; font-size:12px;">
+                © {{ year|default:2026 }} {{ site_name|default:"ZonACha" }} - Tous droits réservés.
+              </p>
+            </td>
+          </tr>
+
+        </table>
+
+      </td>
+    </tr>
+  </table>
+
+</body>
+</html>
