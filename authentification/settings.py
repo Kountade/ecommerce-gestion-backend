@@ -1,6 +1,5 @@
 """
 Django settings for authentification project.
-Version PRODUCTION + LOCAL (avec variables d'environnement)
 """
 
 from pathlib import Path
@@ -13,27 +12,18 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # ============================================================
 # SÉCURITÉ
 # ============================================================
-SECRET_KEY = os.environ.get(
-    'SECRET_KEY',
-    'django-insecure-fogznagdk_m*g#ls^*xsti7zniyi=oub7@krfp1b!envlt9x=@'
-)
+SECRET_KEY = 'django-insecure-fogznagdk_m*g#ls^*xsti7zniyi=oub7@krfp1b!envlt9x=@'
 
-DEBUG = os.environ.get('DEBUG', 'True') == 'True'
+DEBUG = True
 
-ALLOWED_HOSTS = os.environ.get(
-    'ALLOWED_HOSTS',
-    'localhost,127.0.0.1,127.0.0.1:8000'
-).split(',')
+ALLOWED_HOSTS = ["ecommerce-gestion-backend.onrender.com",
+                 "localhost", "127.0.0.1"]
+CSRF_TRUSTED_ORIGINS = ['https://ecommerce-gestion-backend.onrender.com',
+                        'https://ecommerce-gestion-backend.onrender.com',]
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
-# ⚠️ CRUCIAL POUR LES EMAILS (Corrige le lien localhost)
-FRONTEND_URL = os.environ.get('FRONTEND_URL', 'http://localhost:5173/')
-if not FRONTEND_URL.endswith('/'):
-    FRONTEND_URL += '/'
-
-BACKEND_URL = os.environ.get('BACKEND_URL', 'http://127.0.0.1:8000/')
-if not BACKEND_URL.endswith('/'):
-    BACKEND_URL += '/'
-
+# ✅ LIGNE AJOUTÉE ICI : Force le lien vers ton frontend de production
+FRONTEND_URL = 'https://ecommerce-gestion.onrender.com/'
 
 # ============================================================
 # APPLICATIONS
@@ -51,7 +41,7 @@ INSTALLED_APPS = [
     'knox',
     'corsheaders',
     'django_filters',
-    'django_rest_passwordreset',
+    'django_rest_passwordreset',      # ✅ requis pour le reset password
 
     # Vos apps
     'users',
@@ -83,22 +73,28 @@ MIDDLEWARE = [
 # ============================================================
 # CORS & CSRF
 # ============================================================
-CORS_ALLOW_ALL_ORIGINS = DEBUG
+CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_CREDENTIALS = True
 
-CORS_ALLOWED_ORIGINS = os.environ.get(
-    'CORS_ALLOWED_ORIGINS',
-    'http://localhost:3000,http://127.0.0.1:3000,'
-    'http://localhost:5173,http://127.0.0.1:5173,'
-    'http://localhost:5174,http://127.0.0.1:5174'
-).split(',')
+CORS_ALLOWED_ORIGINS = [
+    'http://localhost:3000',
+    'http://127.0.0.1:3000',
+    'http://localhost:5173',
+    'http://127.0.0.1:5173',
+    'http://localhost:5174',
+    'http://127.0.0.1:5174',
+    'https://ecommerce-gestion-backend.onrender.com',
+]
 
-CSRF_TRUSTED_ORIGINS = os.environ.get(
-    'CSRF_TRUSTED_ORIGINS',
-    'http://localhost:3000,http://127.0.0.1:3000,'
-    'http://localhost:5173,http://127.0.0.1:5173,'
-    'http://localhost:5174,http://127.0.0.1:5174'
-).split(',')
+CSRF_TRUSTED_ORIGINS = [
+    'http://localhost:3000',
+    'http://127.0.0.1:3000',
+    'http://localhost:5173',
+    'http://127.0.0.1:5173',
+    'http://localhost:5174',
+    'http://127.0.0.1:5174',
+    'https://ecommerce-gestion-backend.onrender.com',
+]
 
 CSRF_COOKIE_HTTPONLY = False
 CSRF_COOKIE_SAMESITE = 'Lax'
@@ -110,6 +106,8 @@ SESSION_COOKIE_SAMESITE = 'Lax'
 # ============================================================
 AUTH_USER_MODEL = 'users.CustomUser'
 
+# ✅ On garde ModelBackend (utile pour l'admin Django)
+# ✅ On ajoute EmailAuthBackend (utile pour le login par email)
 AUTHENTICATION_BACKENDS = [
     'users.auth_backend.EmailAuthBackend',
     'django.contrib.auth.backends.ModelBackend',
@@ -141,7 +139,7 @@ ROOT_URLCONF = 'authentification.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / "templates"],
+        'DIRS': [BASE_DIR / "templates"],     # ✅ contient backend/email.html
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -158,7 +156,7 @@ WSGI_APPLICATION = 'authentification.wsgi.application'
 
 
 # ============================================================
-# DATABASE (SQLite uniquement - pas de dj_database_url)
+# DATABASE
 # ============================================================
 DATABASES = {
     'default': {
@@ -180,14 +178,14 @@ AUTH_PASSWORD_VALIDATORS = [
 
 
 # ============================================================
-# EMAIL
+# EMAIL  — ✅ UNE SEULE DÉFINITION (SMTP)
 # ============================================================
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', 'bounamakountagoudiaby@gmail.com')
-EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', 'ngqjlxsfefxqtier')
+EMAIL_HOST_USER = 'bounamakountagoudiaby@gmail.com'
+EMAIL_HOST_PASSWORD = 'ngqjlxsfefxqtier'      # mot de passe d'application Gmail
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
 
@@ -201,7 +199,7 @@ USE_TZ = True
 
 
 # ============================================================
-# STATIC & MEDIA (✅ CONFIGURATION EXACTE DE TON ANCIEN CODE)
+# STATIC & MEDIA
 # ============================================================
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
@@ -215,16 +213,3 @@ IMAGE_MAX_SIZE = (800, 800)
 THUMBNAIL_SIZE = (150, 150)
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
-
-# ============================================================
-# SÉCURITÉ PRODUCTION
-# ============================================================
-if not DEBUG:
-    SECURE_SSL_REDIRECT = True
-    SESSION_COOKIE_SECURE = True
-    CSRF_COOKIE_SECURE = True
-    SECURE_HSTS_SECONDS = 31536000
-    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
-    SECURE_HSTS_PRELOAD = False
-    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
