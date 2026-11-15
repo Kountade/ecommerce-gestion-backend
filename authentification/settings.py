@@ -25,7 +25,7 @@ ALLOWED_HOSTS = os.environ.get(
     'localhost,127.0.0.1,127.0.0.1:8000'
 ).split(',')
 
-# ⚠️ CRUCIAL POUR LES EMAILS (C'est ça qui va corriger ton lien localhost)
+# ⚠️ CRUCIAL POUR LES EMAILS (Corrige le lien localhost)
 FRONTEND_URL = os.environ.get('FRONTEND_URL', 'http://localhost:5173/')
 if not FRONTEND_URL.endswith('/'):
     FRONTEND_URL += '/'
@@ -180,20 +180,14 @@ AUTH_PASSWORD_VALIDATORS = [
 
 
 # ============================================================
-# EMAIL — ✅ LIT DEPUIS LES VARIABLES D'ENV
+# EMAIL
 # ============================================================
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = os.environ.get(
-    'EMAIL_HOST_USER',
-    'bounamakountagoudiaby@gmail.com'
-)
-EMAIL_HOST_PASSWORD = os.environ.get(
-    'EMAIL_HOST_PASSWORD',
-    'ngqjlxsfefxqtier'
-)
+EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', 'bounamakountagoudiaby@gmail.com')
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', 'ngqjlxsfefxqtier')
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
 
@@ -207,24 +201,18 @@ USE_TZ = True
 
 
 # ============================================================
-# STATIC & MEDIA
+# STATIC & MEDIA (✅ CONFIGURATION EXACTE DE TON ANCIEN CODE)
 # ============================================================
 STATIC_URL = '/static/'
-# Dossier pour les fichiers statiques en développement
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
-# Dossier pour collectstatic
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-
-# Configuration WhiteNoise
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
-# Configuration des fichiers média
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media/')
 
-# Configuration pour les images (optionnel)
-IMAGE_MAX_SIZE = (800, 800)  # Taille max des images
-THUMBNAIL_SIZE = (150, 150)  # Taille des miniatures
+IMAGE_MAX_SIZE = (800, 800)
+THUMBNAIL_SIZE = (150, 150)
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
