@@ -210,18 +210,21 @@ USE_TZ = True
 # STATIC & MEDIA
 # ============================================================
 STATIC_URL = '/static/'
+# Dossier pour les fichiers statiques en développement
+STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
+# Dossier pour collectstatic
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
-static_dir = BASE_DIR / 'static'
-STATICFILES_DIRS = [static_dir] if static_dir.exists() else []
-
+# Configuration WhiteNoise
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
+# Configuration des fichiers média
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media/')
 
-IMAGE_MAX_SIZE = (800, 800)
-THUMBNAIL_SIZE = (150, 150)
+# Configuration pour les images (optionnel)
+IMAGE_MAX_SIZE = (800, 800)  # Taille max des images
+THUMBNAIL_SIZE = (150, 150)  # Taille des miniatures
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
